@@ -1,0 +1,36 @@
+﻿@model IEnumerable<NewWebApplicationProject.Models.Purchase>
+
+@{
+    ViewData["Title"] = "Purchases for Patient: " + (ViewData["PatientName"] ?? "Unknown");
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Purchase ID</th>
+            <th>Pharmacy</th>
+            <th>Medicine</th>
+            <th>Quantity</th>
+            <th>Price Paid</th>
+            <th>Purchase Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var purchase in Model)
+        {
+            <tr>
+                <td>@purchase.PurchaseId</td>
+                <td>@purchase.Pharmacy?.PharmacyName</td>
+                <td>@purchase.Medicine?.Name</td>
+                <td>@purchase.Quantity</td>
+                <td>@purchase.PricePaid</td>
+                <td>@purchase.PurchaseDate.ToString("g")</td>
+                <td>@purchase.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
