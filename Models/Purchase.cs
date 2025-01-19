@@ -20,13 +20,12 @@ namespace NewWebApplicationProject.Models
         public Medicine? Medicine { get; set; }
 
         public int Quantity { get; set; } // Quantity of medicine purchased
-        public decimal PricePaid { get; set; } // Total price paid
+        
         public DateTime PurchaseDate { get; set; } // Date of purchase
-        public PurchaseStatus Status { get; set; } // Enum for purchase status
 
-        // Optional audit properties
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
+        public bool IsReceived { get; set; }
+
+
     }
 
 }

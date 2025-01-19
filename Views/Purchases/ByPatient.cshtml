@@ -13,9 +13,8 @@
             <th>Pharmacy</th>
             <th>Medicine</th>
             <th>Quantity</th>
-            <th>Price Paid</th>
             <th>Purchase Date</th>
-            <th>Status</th>
+            <th>IsReceived</th>
         </tr>
     </thead>
     <tbody>
@@ -26,11 +25,13 @@
                 <td>@purchase.Pharmacy?.PharmacyName</td>
                 <td>@purchase.Medicine?.Name</td>
                 <td>@purchase.Quantity</td>
-                <td>@purchase.PricePaid</td>
                 <td>@purchase.PurchaseDate.ToString("g")</td>
-                <td>@purchase.Status</td>
+                <td>@purchase.IsReceived</td>
             </tr>
         }
     </tbody>
 </table>
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
+@{
+}

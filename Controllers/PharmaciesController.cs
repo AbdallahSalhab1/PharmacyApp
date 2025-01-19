@@ -66,6 +66,37 @@ namespace PharmacyApp.Controllers
             return View(pharmacy);
         }
 
+
+        [HttpGet]
+        [Route("Pharmacies/ViewAnalytics/{id?}")]
+        public async Task<IActionResult> ViewAnalytics(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var pharmacy = await _context.Pharmacies
+                .Include(p => p.Inventory)
+                .Include(p => p.Purchases)
+                .FirstOrDefaultAsync(m => m.PharmacyId == id);
+
+            if (pharmacy == null)
+            {
+                return NotFound();
+            }
+
+            // Calculate analytics
+            ViewBag.TotalMedicines = pharmacy.Inventory.Select(i => i.MedicineId).Distinct().Count();
+            ViewBag.TotalStock = pharmacy.Inventory.Sum(i => i.Quantity);
+            ViewBag.LowStockItems = pharmacy.Inventory.Count(i => i.Quantity < 10);
+            ViewBag.OutOfStockItems = pharmacy.Inventory.Count(i => i.Quantity == 0);
+            ViewBag.TotalPurchases = pharmacy.Purchases.Count();
+
+            return View(pharmacy);
+        }
+
+
         // GET: Pharmacies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -134,6 +165,8 @@ namespace PharmacyApp.Controllers
 
             return View(pharmacy);
         }
+
+
 
         // POST: Pharmacies/Delete/5
         [HttpPost, ActionName("Delete")]

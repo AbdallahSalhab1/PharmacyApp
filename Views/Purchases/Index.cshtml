@@ -9,6 +9,18 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<div class="mb-3">
+    <form asp-controller="Purchases" asp-action="ByPatient" method="get" class="form-inline">
+        <div class="form-group">
+            <label for="patientId" class="mr-2">Enter Patient ID:</label>
+            <input type="number" class="form-control mr-2" id="patientId" name="id" placeholder="Patient ID" required>
+        </div>
+        <button type="submit" class="btn btn-primary">View Purchases</button>
+    </form>
+</div>
+
+
 <table class="table">
     <thead>
         <tr>
@@ -25,19 +37,10 @@
                 @Html.DisplayNameFor(model => model.Quantity)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PricePaid)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.PurchaseDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
+                @Html.DisplayNameFor(model => model.IsReceived)
             </th>
             <th></th>
         </tr>
@@ -46,10 +49,10 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Patient.PatientId)
+                @Html.DisplayFor(modelItem => item.Patient.Name)
             </td>
             <td>
-                    @Html.DisplayFor(modelItem => item.Pharmacy.PharmacyId)
+                @Html.DisplayFor(modelItem => item.Pharmacy.PharmacyName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Medicine.MedicineId)
@@ -58,19 +61,10 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PricePaid)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.PurchaseDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
+                @Html.DisplayFor(modelItem => item.IsReceived)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.PurchaseId">Edit</a> |

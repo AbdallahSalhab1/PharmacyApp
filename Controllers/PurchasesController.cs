@@ -19,6 +19,30 @@ namespace PharmacyApp.Controllers
             _context = context;
         }
 
+        public async Task<IActionResult> ByPatient(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var purchases = await _context.Purchases
+                .Include(p => p.Medicine)
+                .Include(p => p.Patient)
+                .Include(p => p.Pharmacy)
+                .Where(p => p.PatientId == id)
+                .ToListAsync();
+
+            if (purchases == null || !purchases.Any())
+            {
+                return NotFound("No purchases found for the specified patient ID.");
+            }
+
+            ViewData["PatientName"] = _context.Patients.FirstOrDefault(p => p.PatientId == id)?.Name ?? "Unknown Patient";
+            return View(purchases);
+        }
+
+
         // GET: Purchases
         public async Task<IActionResult> Index()
         {
@@ -51,8 +75,8 @@ namespace PharmacyApp.Controllers
         public IActionResult Create()
         {
             ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "MedicineId");
-            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId");
-            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId");
+            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "Name");
+            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyName");
             return View();
         }
 
@@ -61,7 +85,7 @@ namespace PharmacyApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PurchaseId,PatientId,PharmacyId,MedicineId,Quantity,PricePaid,PurchaseDate,Status,CreatedAt,UpdatedAt")] Purchase purchase)
+        public async Task<IActionResult> Create([Bind("PurchaseId,PatientId,PharmacyId,MedicineId,Quantity,PurchaseDate,IsReceived")] Purchase purchase)
         {
             if (ModelState.IsValid)
             {
@@ -70,8 +94,8 @@ namespace PharmacyApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "MedicineId", purchase.MedicineId);
-            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", purchase.PatientId);
-            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId", purchase.PharmacyId);
+            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "Name", purchase.PatientId);
+            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyName", purchase.PharmacyId);
             return View(purchase);
         }
 
@@ -89,8 +113,8 @@ namespace PharmacyApp.Controllers
                 return NotFound();
             }
             ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "MedicineId", purchase.MedicineId);
-            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", purchase.PatientId);
-            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId", purchase.PharmacyId);
+            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "Name", purchase.PatientId);
+            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyName", purchase.PharmacyId);
             return View(purchase);
         }
 
@@ -99,7 +123,7 @@ namespace PharmacyApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PurchaseId,PatientId,PharmacyId,MedicineId,Quantity,PricePaid,PurchaseDate,Status,CreatedAt,UpdatedAt")] Purchase purchase)
+        public async Task<IActionResult> Edit(int id, [Bind("PurchaseId,PatientId,PharmacyId,MedicineId,Quantity,PurchaseDate,IsReceived")] Purchase purchase)
         {
             if (id != purchase.PurchaseId)
             {
@@ -127,8 +151,8 @@ namespace PharmacyApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "MedicineId", purchase.MedicineId);
-            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", purchase.PatientId);
-            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId", purchase.PharmacyId);
+            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientId", "Name", purchase.PatientId);
+            ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyName", purchase.PharmacyId);
             return View(purchase);
         }
 
@@ -167,32 +191,6 @@ namespace PharmacyApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Purchases/ByPatient/5
-        public async Task<IActionResult> ByPatient(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var purchases = await _context.Purchases
-                .Include(p => p.Medicine)
-                .Include(p => p.Patient)
-                .Include(p => p.Pharmacy)
-                .Where(p => p.PatientId == id)
-                .ToListAsync();
-
-            if (purchases == null || !purchases.Any())
-            {
-                return NotFound("No purchases found for the specified patient ID.");
-            }
-
-            ViewData["PatientName"] = _context.Patients.FirstOrDefault(p => p.PatientId == id)?.Name ?? "Unknown Patient";
-            return View(purchases);
-        }
-
-
 
         private bool PurchaseExists(int id)
         {
