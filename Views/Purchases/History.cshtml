@@ -1,0 +1,63 @@
+﻿@model IEnumerable<NewWebApplicationProject.Models.Purchase>
+
+@{
+    ViewData["Title"] = "Purchase History";
+}
+
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">My Purchase History</h2>
+        <p class="lead mb-0">Patient: @ViewData["PatientName"]</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-success bg-opacity-25">
+        <h4>Purchase Records</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Pharmacy</th>
+                        <th>Quantity</th>
+                        <th>Purchase Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Medicine?.Name</td>
+                            <td>@item.Pharmacy?.PharmacyName</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.PurchaseDate.ToString("g")</td>
+                            <td>
+                                @if (item.IsReceived)
+                                {
+                                    <span class="badge bg-success">Received</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-controller="Purchases" asp-action="Repurchase" method="post">
+                                    <input type="hidden" name="purchaseId" value="@item.PurchaseId" />
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-arrow-repeat"></i> Repurchase
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

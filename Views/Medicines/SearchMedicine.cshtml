@@ -4,17 +4,22 @@
     ViewData["Title"] = "Search Medicine";
 }
 
-<h1>Search Medicine</h1>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Search Medicine</h2>
+    </div>
+</div>
 
-<div class="row mb-4">
-    <div class="col-md-6">
+<div class="card bg-success bg-opacity-10 mb-4">
+    <div class="card-body">
         <form asp-action="SearchMedicine" method="get">
             <div class="input-group">
                 <input type="text" class="form-control" name="medicineName"
                        placeholder="Enter medicine name to search"
-                       value="@ViewData["SearchTerm"]"
-                       aria-label="Medicine Name">
-                <button class="btn btn-primary" type="submit">Search</button>
+                       value="@ViewData["SearchTerm"]">
+                <button class="btn btn-success" type="submit">
+                    <i class="bi bi-search"></i> Search
+                </button>
             </div>
         </form>
     </div>
@@ -24,65 +29,75 @@
 {
     if (Model.Any())
     {
-        <h4>Pharmacies with "@ViewData["SearchTerm"]" in stock:</h4>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Pharmacy Name</th>
-                    <th>Address</th>
-                    <th>Phone Number</th>
-                    <th>Available Quantity</th>
-                    <th>Action</th> <!-- New column for the Purchase button -->
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var pharmacy in Model)
-                {
-                    // Filter inventory for the current pharmacy
-                    var filteredInventory = pharmacy.Inventory
-                    ?.Where(i => i.Medicine.Name
-                    .Contains(ViewData["SearchTerm"].ToString(), StringComparison.OrdinalIgnoreCase)
-                    && i.Quantity > 0)
-                    .ToList();
-
-                    if (filteredInventory != null && filteredInventory.Any())
-                    {
-                        foreach (var item in filteredInventory)
-                        {
+        <div class="card">
+            <div class="card-header bg-success bg-opacity-25">
+                <h4>Pharmacies with "@ViewData["SearchTerm"]" in stock:</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="bg-success bg-opacity-25">
                             <tr>
-                                <td>@pharmacy.PharmacyName</td>
-                                <td>@pharmacy.Address</td>
-                                <td>@pharmacy.PhoneNumber</td>
-                                <td>@item.Quantity</td>
-                                <td>
-                                    <form asp-controller="Purchases" asp-action="Create" method="get">
-                                        <input type="hidden" name="pharmacyId" value="@pharmacy.PharmacyId" />
-                                        <input type="hidden" name="medicineId" value="@item.MedicineId" />
-                                        <button class="btn btn-success" type="submit">Purchase</button>
-                                    </form>
-                                </td>
+                                <th>Pharmacy</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Available</th>
+                                <th>Action</th>
                             </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td>@pharmacy.PharmacyName</td>
-                            <td>@pharmacy.Address</td>
-                            <td>@pharmacy.PhoneNumber</td>
-                            <td>Not Available</td>
-                            <td>
-                                <button class="btn btn-secondary" disabled>Unavailable</button>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var pharmacy in Model)
+                            {
+                                var filteredInventory = pharmacy.Inventory?
+                                .Where(i => i.Medicine.Name.Contains(ViewData["SearchTerm"].ToString(), StringComparison.OrdinalIgnoreCase)
+                                && i.Quantity > 0)
+                                .ToList();
+
+                                if (filteredInventory?.Any() == true)
+                                {
+                                    foreach (var item in filteredInventory)
+                                    {
+                                        <tr>
+                                            <td>@pharmacy.PharmacyName</td>
+                                            <td>@pharmacy.Address</td>
+                                            <td>@pharmacy.PhoneNumber</td>
+                                            <td>@item.Quantity</td>
+                                            <td>
+                                                <a asp-controller="Purchases"
+                                                   asp-action="CreateForPatient"
+                                                   asp-route-pharmacyId="@pharmacy.PharmacyId"
+                                                   asp-route-medicineId="@item.MedicineId"
+                                                   class="btn btn-success btn-sm">
+                                                    <i class="bi bi-cart-plus"></i> Purchase
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr class="table-light">
+                                        <td>@pharmacy.PharmacyName</td>
+                                        <td>@pharmacy.Address</td>
+                                        <td>@pharmacy.PhoneNumber</td>
+                                        <td>Not Available</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="bi bi-x-circle"></i> Unavailable
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     }
     else
     {
-        <div class="alert alert-info">
+        <div class="alert alert-info bg-success bg-opacity-10">
             No pharmacies found with "@ViewData["SearchTerm"]" in stock.
         </div>
     }

@@ -7,7 +7,7 @@ namespace NewWebApplicationProject.Models
     {
         public int PurchaseId { get; set; }
 
-        [Required]
+        
         public int? PatientId { get; set; } // Foreign key to Patient
         public Patient? Patient { get; set; }
 

@@ -2,21 +2,90 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NewWebApplicationProject.Models;
 using PharmacyApp.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PharmacyApp.Controllers
 {
     public class PurchasesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public PurchasesController(ApplicationDbContext context)
+        public PurchasesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> CreateForPatient(int pharmacyId, int medicineId)
+        {
+            var pharmacy = await _context.Pharmacies.FindAsync(pharmacyId);
+            var medicine = await _context.Medicines.FindAsync(medicineId);
+
+            if (pharmacy == null || medicine == null)
+                return NotFound();
+
+            ViewData["PharmacyName"] = pharmacy.PharmacyName;
+            ViewData["MedicineName"] = medicine.Name;
+            ViewData["MedicinePrice"] = medicine.Price;
+
+            var purchase = new Purchase
+            {
+                PharmacyId = pharmacyId,
+                MedicineId = medicineId
+            };
+
+            return View(purchase);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> CreateForPatient([Bind("PharmacyId,MedicineId,Quantity")] Purchase purchase)
+        {
+            if (!ModelState.IsValid)
+                return View(purchase);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found");
+                return View(purchase);
+            }
+
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == user.Email);
+            if (patient == null)
+            {
+                ModelState.AddModelError("", $"No patient found for email {user.Email}");
+                return View(purchase);
+            }
+
+            try
+            {
+                purchase.PatientId = patient.PatientId;
+                purchase.PurchaseDate = DateTime.Now;
+                purchase.IsReceived = false;
+
+                _context.Purchases.Add(purchase);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(History));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error creating purchase: {ex.Message}");
+                return View(purchase);
+            }
         }
 
         public async Task<IActionResult> ByPatient(int? id)
@@ -39,6 +108,28 @@ namespace PharmacyApp.Controllers
             }
 
             ViewData["PatientName"] = _context.Patients.FirstOrDefault(p => p.PatientId == id)?.Name ?? "Unknown Patient";
+            return View(purchases);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> History()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound("User not found");
+
+            var patient = await _context.Patients
+                .Include(p => p.Purchases)
+                    .ThenInclude(p => p.Medicine)
+                .Include(p => p.Purchases)
+                    .ThenInclude(p => p.Pharmacy)
+                .FirstOrDefaultAsync(p => p.Email == user.Email);
+
+            if (patient == null) return NotFound($"No patient found for email: {user.Email}");
+
+            var purchases = patient.Purchases.OrderBy(p => p.PurchaseDate).ToList();
+            ViewData["PatientName"] = patient.Name;
+
             return View(purchases);
         }
 

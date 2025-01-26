@@ -9,7 +9,7 @@ namespace NewWebApplicationProject.Models
         public int InventoryId { get; set; }
 
         // Foreign key to Pharmacy
-        [Required]
+        
         public int? PharmacyId { get; set; }
         public Pharmacy? Pharmacy { get; set; } // Navigation property
 

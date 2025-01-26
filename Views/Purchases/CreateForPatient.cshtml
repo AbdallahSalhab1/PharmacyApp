@@ -1,0 +1,54 @@
+﻿@model NewWebApplicationProject.Models.Purchase
+
+@{
+    ViewData["Title"] = "Confirm Purchase";
+}
+
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Confirm Purchase</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-success bg-opacity-10">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5>Purchase Details</h5>
+                    <p><strong>Pharmacy:</strong> @ViewData["PharmacyName"]</p>
+                    <p><strong>Medicine:</strong> @ViewData["MedicineName"]</p>
+                    <p><strong>Price per Unit:</strong> $@ViewData["MedicinePrice"]</p>
+                </div>
+
+                <form asp-action="CreateForPatient" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <input type="hidden" asp-for="PharmacyId" />
+                    <input type="hidden" asp-for="MedicineId" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Quantity" class="control-label">Quantity</label>
+                        <input asp-for="Quantity" class="form-control" min="1" />
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cart-plus"></i> Confirm Purchase
+                        </button>
+                        <a asp-controller="Medicines" asp-action="Search" class="btn btn-outline-success">
+                            <i class="bi bi-arrow-left"></i> Back to Search
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

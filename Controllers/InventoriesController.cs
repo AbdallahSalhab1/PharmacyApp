@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NewWebApplicationProject.Models;
 using PharmacyApp.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PharmacyApp.Controllers
 {
     public class InventoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public InventoriesController(ApplicationDbContext context)
+        public InventoriesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Inventories
@@ -71,6 +76,99 @@ namespace PharmacyApp.Controllers
             ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId", inventory.PharmacyId);
             return View(inventory);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Pharmacy")]
+        public async Task<IActionResult> PharmacyInventory()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var pharmacy = await _context.Pharmacies
+                .FirstOrDefaultAsync(p => p.Email == user.Email);
+
+            if (pharmacy != null)
+            {
+                var inventories = await _context.Inventories
+                    .Include(i => i.Medicine)
+                    .Include(i => i.Pharmacy)
+                    .Where(i => i.PharmacyId == pharmacy.PharmacyId)
+                    .ToListAsync();
+                return View(inventories);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        [Authorize(Roles = "Pharmacy")]
+        public IActionResult CreateForPharmacy()
+        {
+            ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Pharmacy")]
+        public async Task<IActionResult> CreateForPharmacy([Bind("MedicineId,Quantity")] Inventory inventory)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Log validation errors
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Validation Error: {error.ErrorMessage}");
+                }
+
+                ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "Name");
+                return View(inventory);
+            }
+
+            // Get the logged-in user's email
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Logged-in user not found.");
+                ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "Name");
+                return View(inventory);
+            }
+
+            // Find the pharmacy associated with the logged-in user's email
+            var pharmacy = await _context.Pharmacies
+                .FirstOrDefaultAsync(p => p.Email == user.Email);
+
+            if (pharmacy == null)
+            {
+                Console.WriteLine($"No pharmacy found for email: {user.Email}");
+                ModelState.AddModelError("", $"No pharmacy found for email {user.Email}");
+                ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "Name");
+                return View(inventory);
+            }
+
+            try
+            {
+                // Assign the pharmacy ID to the inventory
+                inventory.PharmacyId = pharmacy.PharmacyId;
+                inventory.LastUpdated = DateTime.Now;
+
+                Console.WriteLine($"PharmacyId set to: {inventory.PharmacyId}");
+
+                // Add the inventory to the database
+                _context.Inventories.Add(inventory);
+                await _context.SaveChangesAsync();
+
+                // Redirect to the pharmacy's inventory list
+                return RedirectToAction(nameof(PharmacyInventory));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving inventory: {ex.Message}");
+                ModelState.AddModelError("", $"Error saving inventory: {ex.Message}");
+                ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "Name");
+                return View(inventory);
+            }
+        }
+
+
+
+
 
         // GET: Inventories/Edit/5
         public async Task<IActionResult> Edit(int? id)

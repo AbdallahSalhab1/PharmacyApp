@@ -1,107 +1,157 @@
 ﻿@model NewWebApplicationProject.Models.Pharmacy
-
 @{
-    ViewData["Title"] = "Analytics for Pharmacy: " + Model.PharmacyName;
+    ViewData["Title"] = "Analytics for " + Model.PharmacyName;
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="card mb-4">
-    <div class="card-header">
-        <h4>Pharmacy Details</h4>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-success bg-opacity-75 text-white">
+                <div class="card-body">
+                    <h2 class="display-4">@Model.PharmacyName Analytics</h2>
+                    <p class="lead mb-0">License: @Model.LicenseNumber | @Model.Address</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <p><strong>Pharmacy Name:</strong> @Model.PharmacyName</p>
-        <p><strong>License Number:</strong> @Model.LicenseNumber</p>
-        <p><strong>Address:</strong> @Model.Address</p>
-        <p><strong>Email:</strong> @Model.Email</p>
-        <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-dark bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <h3 class="display-4">@ViewBag.TotalMedicines</h3>
+                    <p class="mb-0">Unique Medicines</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <h3 class="display-4">@ViewBag.TotalStock</h3>
+                    <p class="mb-0">Total Stock</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <h3 class="display-4">@ViewBag.LowStockItems</h3>
+                    <p class="mb-0">Low Stock Items</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <h3 class="display-4">@ViewBag.OutOfStockItems</h3>
+                    <p class="mb-0">Out of Stock</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success bg-opacity-25">
+                    <h4>Stock Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success bg-opacity-25">
+                    <h4>Purchase Trends</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="purchaseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success bg-opacity-25">
+                    <h4>Inventory Status</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="bg-success bg-opacity-25">
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Last Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Inventory)
+                                {
+                                    <tr>
+                                        <td>@item.Medicine?.Name</td>
+                                        <td>@item.Quantity</td>
+                                        <td>
+                                            @if (item.Quantity == 0)
+                                            {
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            }
+                                            else if (item.Quantity < 10)
+                                            {
+                                                <span class="badge bg-warning">Low Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">In Stock</span>
+                                            }
+                                        </td>
+                                        <td>@item.LastUpdated.ToString("g")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4>Analytics Overview</h4>
-    </div>
-    <div class="card-body">
-        <p><strong>Total Unique Medicines:</strong> @ViewBag.TotalMedicines</p>
-        <p><strong>Total Stock Quantity:</strong> @ViewBag.TotalStock</p>
-        <p><strong>Low Stock Items (&lt; 10 units):</strong> @ViewBag.LowStockItems</p>
-        <p><strong>Out of Stock Items:</strong> @ViewBag.OutOfStockItems</p>
-        <p><strong>Total Purchases:</strong> @ViewBag.TotalPurchases</p>
-    </div>
-</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const greenPalette = ['#198754', '#20c997', '#75b798'];
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4>Inventory Details</h4>
-    </div>
-    <div class="card-body">
-        @if (Model.Inventory != null && Model.Inventory.Any())
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Medicine Name</th>
-                        <th>Quantity</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Inventory)
-                    {
-                        <tr>
-                            <td>@item.Medicine?.Name</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.LastUpdated.ToString("g")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No inventory data available for this pharmacy.</p>
-        }
-    </div>
-</div>
+        new Chart(document.getElementById('stockChart'), {
+            type: 'pie',
+            data: {
+                labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+                datasets: [{
+                    data: [@(ViewBag.TotalMedicines - ViewBag.LowStockItems - ViewBag.OutOfStockItems),
+        @ViewBag.LowStockItems,
+        @ViewBag.OutOfStockItems],
+                    backgroundColor: greenPalette
+                }]
+            }
+        });
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h4>Purchase Details</h4>
-    </div>
-    <div class="card-body">
-        @if (Model.Purchases != null && Model.Purchases.Any())
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Purchase ID</th>
-                        <th>Patient Name</th>
-                        <th>Medicine Name</th>
-                        <th>Quantity</th>
-                        <th>Purchase Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var purchase in Model.Purchases)
-                    {
-                        <tr>
-                            <td>@purchase.PurchaseId</td>
-                            <td>@purchase.Patient?.Name</td>
-                            <td>@purchase.Medicine?.Name</td>
-                            <td>@purchase.Quantity</td>
-                            <td>@purchase.PurchaseDate.ToString("g")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No purchase data available for this pharmacy.</p>
-        }
-    </div>
-</div>
-
-<a asp-controller="Pharmacies" asp-action="Index" class="btn btn-secondary">Back to Pharmacies</a>
+        new Chart(document.getElementById('purchaseChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Monthly Purchases',
+                    data: @Json.Serialize(ViewBag.MonthlyPurchases ?? new[] { 0, 0, 0, 0, 0, 0 }),
+                    borderColor: '#198754',
+                    backgroundColor: '#75b798',
+                    tension: 0.1
+                }]
+            }
+        });
+    </script>
+}

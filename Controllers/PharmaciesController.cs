@@ -2,21 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NewWebApplicationProject.Models;
 using PharmacyApp.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using NewWebApplicationProject.Models;
+using PharmacyApp.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PharmacyApp.Controllers
 {
     public class PharmaciesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public PharmaciesController(ApplicationDbContext context)
+        public PharmaciesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Pharmacies
@@ -78,7 +94,9 @@ namespace PharmacyApp.Controllers
 
             var pharmacy = await _context.Pharmacies
                 .Include(p => p.Inventory)
+                    .ThenInclude(i => i.Medicine)
                 .Include(p => p.Purchases)
+                    .ThenInclude(p => p.Medicine)
                 .FirstOrDefaultAsync(m => m.PharmacyId == id);
 
             if (pharmacy == null)
@@ -93,7 +111,78 @@ namespace PharmacyApp.Controllers
             ViewBag.OutOfStockItems = pharmacy.Inventory.Count(i => i.Quantity == 0);
             ViewBag.TotalPurchases = pharmacy.Purchases.Count();
 
+            // Calculate monthly purchases for the chart
+            var monthlyPurchases = pharmacy.Purchases
+                .GroupBy(p => p.PurchaseDate.Month)
+                .OrderBy(g => g.Key)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToList();
+
+            // Create arrays for labels and data
+            var months = new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+            var purchaseData = new int[12];
+
+            foreach (var mp in monthlyPurchases)
+            {
+                purchaseData[mp.Month - 1] = mp.Count;
+            }
+
+            ViewBag.MonthLabels = months;
+            ViewBag.MonthlyPurchases = purchaseData;
+
             return View(pharmacy);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Pharmacy")]
+        [Route("Pharmacies/ViewMyAnalytics")]
+        public async Task<IActionResult> ViewMyAnalytics()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("Logged-in user not found.");
+            }
+
+            var pharmacy = await _context.Pharmacies
+                .Include(p => p.Inventory)
+                    .ThenInclude(i => i.Medicine)
+                .Include(p => p.Purchases)
+                    .ThenInclude(p => p.Medicine)
+                .FirstOrDefaultAsync(p => p.Email == user.Email);
+
+            if (pharmacy == null)
+            {
+                return NotFound($"No pharmacy found for email: {user.Email}");
+            }
+
+            // Calculate analytics
+            ViewBag.TotalMedicines = pharmacy.Inventory.Select(i => i.MedicineId).Distinct().Count();
+            ViewBag.TotalStock = pharmacy.Inventory.Sum(i => i.Quantity);
+            ViewBag.LowStockItems = pharmacy.Inventory.Count(i => i.Quantity < 10);
+            ViewBag.OutOfStockItems = pharmacy.Inventory.Count(i => i.Quantity == 0);
+            ViewBag.TotalPurchases = pharmacy.Purchases.Count();
+
+            // Calculate monthly purchases for the chart
+            var monthlyPurchases = pharmacy.Purchases
+                .GroupBy(p => p.PurchaseDate.Month)
+                .OrderBy(g => g.Key)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToList();
+
+            // Create arrays for labels and data
+            var months = new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+            var purchaseData = new int[12];
+
+            foreach (var mp in monthlyPurchases)
+            {
+                purchaseData[mp.Month - 1] = mp.Count;
+            }
+
+            ViewBag.MonthLabels = months;
+            ViewBag.MonthlyPurchases = purchaseData;
+
+            return View("ViewAnalytics", pharmacy);
         }
 
 

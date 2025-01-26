@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NewWebApplicationProject.Models;
 using PharmacyApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+
+
 
 var app = builder.Build();
 
@@ -78,38 +82,85 @@ using (var scope = app.Services.CreateScope())
 
 using (var scope = app.Services.CreateScope())
 {
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    if (!await roleManager.RoleExistsAsync("Pharmacy"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Pharmacy"));
+    }
 
     string email = "pharmacy@pharmacy.com";
     string password = "Test1234,";
 
+    // Create pharmacy first
+    if (!await dbContext.Pharmacies.AnyAsync(p => p.Email == email))
+    {
+        var pharmacy = new Pharmacy
+        {
+            Email = email,
+            PharmacyName = "Sample Pharmacy",
+            LicenseNumber = "LICENSE123",
+            Address = "123 Main St",
+            PhoneNumber = "1234567890",
+            IsVerified = true
+        };
+        dbContext.Pharmacies.Add(pharmacy);
+        await dbContext.SaveChangesAsync();
+    }
+
+    // Then create user
     if (await userManager.FindByEmailAsync(email) == null)
     {
-        var user = new IdentityUser();
-        user.UserName = email;
-        user.Email = email;
-
+        var user = new IdentityUser
+        {
+            UserName = email,
+            Email = email
+        };
         await userManager.CreateAsync(user, password);
-
         await userManager.AddToRoleAsync(user, "Pharmacy");
     }
 }
 
+
 using (var scope = app.Services.CreateScope())
 {
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    // Ensure the "Patient" role exists
+    if (!await roleManager.RoleExistsAsync("Patient"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Patient"));
+    }
 
     string email = "patient@patient.com";
     string password = "Test1234,";
 
+    
+    if (!await dbContext.Patients.AnyAsync(p => p.Email == email))
+    {
+        var patient = new Patient
+        {
+            Name = "Mareed",
+            Email = email, 
+            PhoneNumber = "1234567890" 
+        };
+        dbContext.Patients.Add(patient);
+        await dbContext.SaveChangesAsync();
+    }
+
+    
     if (await userManager.FindByEmailAsync(email) == null)
     {
-        var user = new IdentityUser();
-        user.UserName = email;
-        user.Email = email;
-
+        var user = new IdentityUser
+        {
+            UserName = email,
+            Email = email
+        };
         await userManager.CreateAsync(user, password);
-
         await userManager.AddToRoleAsync(user, "Patient");
     }
 }
