@@ -1,8 +1,60 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="container mt-4">
+        <h2 class="mb-4">Admin Dashboard</h2>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Patients</h5>
+                        <p class="card-text">Manage patient records and information</p>
+                        <a class="btn btn-primary" href="/Patients/Index">View Patient</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Pharmacies</h5>
+                        <p class="card-text">Manage pharmacies details</p>
+                        <a class="btn btn-primary" href="/Pharmacies/Index">View Pharmacies</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Purchases</h5>
+                        <p class="card-text">View and manage medicine purchases</p>
+                        <a class="btn btn-primary" href="/Purchases/Index">View Purchases</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Medicines</h5>
+                        <p class="card-text">Manage medicine details</p>
+                        <a class="btn btn-primary" href="/Medicines/Index">View Medicines</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

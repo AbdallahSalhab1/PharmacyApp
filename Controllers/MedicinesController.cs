@@ -19,6 +19,33 @@ namespace PharmacyApp.Controllers
             _context = context;
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> SearchMedicine(string medicineName)
+        {
+            // Check if the input is null or empty
+            if (string.IsNullOrEmpty(medicineName))
+            {
+                return View(new List<Pharmacy>());
+            }
+
+            // Query pharmacies that have the medicine in their inventory with a quantity greater than 0
+            var pharmaciesWithMedicine = await _context.Pharmacies
+                .Include(p => p.Inventory)
+                    .ThenInclude(i => i.Medicine)
+                .Where(p => p.Inventory.Any(i =>
+                    EF.Functions.Like(i.Medicine.Name, $"%{medicineName}%") &&
+                    i.Quantity > 0))
+                .ToListAsync();
+
+            // Pass the search term to the view for display purposes
+            ViewData["SearchTerm"] = medicineName;
+
+            return View(pharmaciesWithMedicine);
+        }
+
+
+
         // GET: Medicines
         public async Task<IActionResult> Index()
         {
