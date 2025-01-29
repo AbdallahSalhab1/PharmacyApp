@@ -17,6 +17,10 @@ namespace PharmacyApp.Controllers
 
         public IActionResult Index()
         {
+            if (User.IsInRole("Pharmacy"))
+            {
+                return RedirectToAction("ViewMyAnalytics", "Pharmacies");
+            }
             return View();
         }
 
@@ -24,6 +28,7 @@ namespace PharmacyApp.Controllers
         {
             return View();
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

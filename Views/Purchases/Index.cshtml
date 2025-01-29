@@ -1,77 +1,110 @@
 ﻿@model IEnumerable<NewWebApplicationProject.Models.Purchase>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Purchase Records";
+
+    // Sort purchases: non-received first, then by date
+    var sortedPurchases = Model.OrderBy(p => p.IsReceived)
+                              .ThenByDescending(p => p.PurchaseDate);
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-
-<div class="mb-3">
-    <form asp-controller="Purchases" asp-action="ByPatient" method="get" class="form-inline">
-        <div class="form-group">
-            <label for="patientId" class="mr-2">Enter Patient ID:</label>
-            <input type="number" class="form-control mr-2" id="patientId" name="id" placeholder="Patient ID" required>
-        </div>
-        <button type="submit" class="btn btn-primary">View Purchases</button>
-    </form>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Purchase Records</h2>
+    </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header bg-success bg-opacity-25">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Search By Patient</h4>
+        </div>
+    </div>
+    <div class="card-body bg-success bg-opacity-10">
+        <form asp-controller="Purchases" asp-action="ByPatient" method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="patientId" class="form-label">Patient ID</label>
+                <input type="number" class="form-control" id="patientId" name="id" placeholder="Enter Patient ID" required>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Patient)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Pharmacy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Medicine)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Quantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PurchaseDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsReceived)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Patient.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Pharmacy.PharmacyName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Medicine.MedicineId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PurchaseDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsReceived)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PurchaseId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PurchaseId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PurchaseId">Delete</a>
-            </td>
-        </tr>
+<div class="card">
+    <div class="card-header bg-success bg-opacity-25">
+        <h4 class="mb-0">All Purchases</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Patient Name</th>
+                        <th>Pharmacy</th>
+                        <th>Medicine</th>
+                        <th>Quantity</th>
+                        <th>Purchase Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in sortedPurchases)
+                    {
+                        <tr class="@(item.IsReceived ? "bg-success bg-opacity-10" : "")">
+                            <td>@item.PatientId</td>
+                            <td>@item.Patient?.Name</td>
+                            <td>@item.Pharmacy?.PharmacyName</td>
+                            <td>@item.Medicine?.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.PurchaseDate.ToString("g")</td>
+                            <td>
+                                @if (item.IsReceived)
+                                {
+                                    <span class="badge bg-success">Received</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.PurchaseId"
+                                       class="btn btn-success btn-sm me-2">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.PurchaseId"
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.PurchaseId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="Pharmacies" asp-action="ViewMyAnalytics" class="btn btn-success">
+        <i class="bi bi-arrow-left"></i> Back to Analytics
+    </a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-    </tbody>
-</table>

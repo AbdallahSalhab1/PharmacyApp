@@ -1,37 +1,133 @@
 ﻿@model IEnumerable<NewWebApplicationProject.Models.Inventory>
-
 @{
-    ViewData["Title"] = "My Pharmacy Inventory";
+    ViewData["Title"] = "Pharmacy Inventory";
 }
 
-<h1>My Pharmacy Inventory</h1>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Inventory Management</h2>
+    </div>
+</div>
 
-<p>
-    <a asp-action="CreateForPharmacy" class="btn btn-primary">Add New Medicine</a>
-</p>
+<div class="card mb-4">
+    <div class="card-header bg-success bg-opacity-25">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Current Inventory</h4>
+            <a asp-action="CreateForPharmacy" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Medicine
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Quantity</th>
+                        <th>Last Updated</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Medicine?.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.LastUpdated.ToString("g")</td>
+                            <td>
+                                @if (item.Quantity == 0)
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                                else if (item.Quantity < 10)
+                                {
+                                    <span class="badge bg-warning">Low Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">In Stock</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.InventoryId"
+                                       class="btn btn-success btn-sm me-2">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.InventoryId"
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.InventoryId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Medicine</th>
-            <th>Quantity</th>
-            <th>Last Updated</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Medicine?.Name</td>
-                <td>@item.Quantity</td>
-                <td>@item.LastUpdated.ToString("g")</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.InventoryId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card mb-4">
+    <div class="card-header bg-success bg-opacity-25">
+        <h4 class="mb-0">Medicine Summary</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Total Quantity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var medicineSummary = Model.GroupBy(i => i.Medicine.Name)
+                        .Select(g => new
+                        {
+                            MedicineName = g.Key,
+                            TotalQuantity = g.Sum(i => i.Quantity)
+                        });
+                    }
+
+                    @foreach (var summary in medicineSummary)
+                    {
+                        <tr>
+                            <td>@summary.MedicineName</td>
+                            <td>@summary.TotalQuantity</td>
+                            <td>
+                                @if (summary.TotalQuantity == 0)
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                                else if (summary.TotalQuantity < 10)
+                                {
+                                    <span class="badge bg-warning">Low Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">In Stock</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="Pharmacies" asp-action="ViewMyAnalytics" class="btn btn-success">
+        <i class="bi bi-arrow-left"></i> Back to Analytics
+    </a>
+</div>

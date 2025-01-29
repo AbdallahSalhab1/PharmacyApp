@@ -5,7 +5,7 @@ using PharmacyApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -21,7 +21,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -33,11 +33,22 @@ else
     app.UseHsts();
 }
 
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated &&
+        !context.Request.Path.StartsWithSegments("/Identity/Account/Login"))
+    {
+        context.Response.Redirect("/Identity/Account/Login");
+        return;
+    }
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -94,7 +105,7 @@ using (var scope = app.Services.CreateScope())
     string email = "pharmacy@pharmacy.com";
     string password = "Test1234,";
 
-    // Create pharmacy first
+    
     if (!await dbContext.Pharmacies.AnyAsync(p => p.Email == email))
     {
         var pharmacy = new Pharmacy
@@ -110,7 +121,7 @@ using (var scope = app.Services.CreateScope())
         await dbContext.SaveChangesAsync();
     }
 
-    // Then create user
+    
     if (await userManager.FindByEmailAsync(email) == null)
     {
         var user = new IdentityUser
@@ -130,7 +141,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    // Ensure the "Patient" role exists
+    
     if (!await roleManager.RoleExistsAsync("Patient"))
     {
         await roleManager.CreateAsync(new IdentityRole("Patient"));

@@ -16,6 +16,34 @@
     </div>
 
     <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam display-1 text-success mb-3"></i>
+                    <h5 class="card-title">Inventory Management</h5>
+                    <p class="card-text">View and manage your pharmacy's inventory</p>
+                    <a href="/Inventories/PharmacyInventory" class="btn btn-success">
+                        <i class="bi bi-box-seam"></i> View Inventory
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 bg-success bg-opacity-25">
+                <div class="card-body text-center">
+                    <i class="bi bi-cart display-1 text-success mb-3"></i>
+                    <h5 class="card-title">Purchase Records</h5>
+                    <p class="card-text">View and manage customer purchases</p>
+                    <a href="/Purchases/index" class="btn btn-success">
+                        <i class="bi bi-cart"></i> View Purchases
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
         <div class="col-md-3">
             <div class="card text-dark bg-success bg-opacity-25">
                 <div class="card-body text-center">
@@ -85,23 +113,34 @@
                             <thead class="bg-success bg-opacity-25">
                                 <tr>
                                     <th>Medicine</th>
-                                    <th>Quantity</th>
+                                    <th>Total Quantity</th>
                                     <th>Status</th>
                                     <th>Last Updated</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in Model.Inventory)
+                                @{
+                                    var groupedInventory = Model.Inventory
+                                    .GroupBy(i => i.Medicine.Name)
+                                    .Select(g => new
+                                    {
+                                        MedicineName = g.Key,
+                                        TotalQuantity = g.Sum(i => i.Quantity),
+                                        LastUpdated = g.Max(i => i.LastUpdated)
+                                    });
+                                }
+
+                                @foreach (var item in groupedInventory)
                                 {
                                     <tr>
-                                        <td>@item.Medicine?.Name</td>
-                                        <td>@item.Quantity</td>
+                                        <td>@item.MedicineName</td>
+                                        <td>@item.TotalQuantity</td>
                                         <td>
-                                            @if (item.Quantity == 0)
+                                            @if (item.TotalQuantity == 0)
                                             {
                                                 <span class="badge bg-danger">Out of Stock</span>
                                             }
-                                            else if (item.Quantity < 10)
+                                            else if (item.TotalQuantity < 10)
                                             {
                                                 <span class="badge bg-warning">Low Stock</span>
                                             }

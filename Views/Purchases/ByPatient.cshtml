@@ -1,37 +1,86 @@
 ﻿@model IEnumerable<NewWebApplicationProject.Models.Purchase>
-
 @{
     ViewData["Title"] = "Purchases for Patient: " + (ViewData["PatientName"] ?? "Unknown");
+    var sortedPurchases = Model.OrderBy(p => p.IsReceived)
+                              .ThenByDescending(p => p.PurchaseDate);
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Patient Purchase History</h2>
+        <p class="lead mb-0">Patient: @(ViewData["PatientName"] ?? "Unknown")</p>
+    </div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Purchase ID</th>
-            <th>Pharmacy</th>
-            <th>Medicine</th>
-            <th>Quantity</th>
-            <th>Purchase Date</th>
-            <th>IsReceived</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var purchase in Model)
-        {
-            <tr>
-                <td>@purchase.PurchaseId</td>
-                <td>@purchase.Pharmacy?.PharmacyName</td>
-                <td>@purchase.Medicine?.Name</td>
-                <td>@purchase.Quantity</td>
-                <td>@purchase.PurchaseDate.ToString("g")</td>
-                <td>@purchase.IsReceived</td>
-            </tr>
-        }
-    </tbody>
-</table>
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+<div class="card">
+    <div class="card-header bg-success bg-opacity-25">
+        <h4 class="mb-0">Purchase Records</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Purchase ID</th>
+                        <th>Pharmacy</th>
+                        <th>Medicine</th>
+                        <th>Quantity</th>
+                        <th>Purchase Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var purchase in sortedPurchases)
+                    {
+                        <tr class="@(purchase.IsReceived ? "bg-success bg-opacity-10" : "")">
+                            <td>@purchase.PurchaseId</td>
+                            <td>@purchase.Pharmacy?.PharmacyName</td>
+                            <td>@purchase.Medicine?.Name</td>
+                            <td>@purchase.Quantity</td>
+                            <td>@purchase.PurchaseDate.ToString("g")</td>
+                            <td>
+                                @if (purchase.IsReceived)
+                                {
+                                    <span class="badge bg-success">Received</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@purchase.PurchaseId"
+                                       class="btn btn-success btn-sm me-2">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@purchase.PurchaseId"
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@purchase.PurchaseId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-@{
+<div class="text-center mt-4">
+    <a asp-controller="Purchases" asp-action="Index" class="btn btn-success">
+        <i class="bi bi-arrow-left"></i> Back to All Purchases
+    </a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
