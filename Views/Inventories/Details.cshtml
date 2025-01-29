@@ -1,42 +1,46 @@
 ﻿@model NewWebApplicationProject.Models.Inventory
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Inventory Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Inventory</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Pharmacy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Pharmacy.PharmacyId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Medicine)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Medicine.MedicineId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Quantity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Quantity)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastUpdated)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastUpdated)
-        </dd>
-    </dl>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Inventory Details</h2>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.InventoryId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="card bg-success bg-opacity-10">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <tr>
+                        <th class="bg-success bg-opacity-25" style="width: 200px;">Pharmacy Name</th>
+                        <td>@Model.Pharmacy?.PharmacyName</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-success bg-opacity-25">Medicine Name</th>
+                        <td>@Model.Medicine?.Name</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-success bg-opacity-25">Quantity</th>
+                        <td>@Model.Quantity</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-success bg-opacity-25">Last Updated</th>
+                        <td>@Model.LastUpdated.ToString("g")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a asp-action="Edit" asp-route-id="@Model?.InventoryId" class="btn btn-success me-2">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a asp-action="PharmacyInventory" class="btn btn-outline-success">
+                <i class="bi bi-arrow-left"></i> Back to Inventory
+            </a>
+        </div>
+    </div>
 </div>

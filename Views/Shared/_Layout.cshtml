@@ -18,13 +18,13 @@
             width: 250px;
             height: 100%;
             left: -250px;
-            background-color: #198754; /* Bootstrap success green */
+            background-color: #198754; 
             transition: 0.4s;
             z-index: 1000;
         }
 
         .navbar {
-            background-color: #198754 !important; /* Bootstrap success green */
+            background-color: #198754 !important; 
         }
 
         .brand-text {
@@ -38,7 +38,7 @@
 
         .sidebar-header {
             padding: 20px;
-            background-color: #157347; /* Slightly darker green */
+            background-color: #157347; 
             color: white;
         }
 
@@ -71,23 +71,59 @@
             #content.active {
                 margin-left: 250px;
             }
+
+        .contact-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .contact-item {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+            .contact-item:hover {
+                transform: scale(1.2);
+            }
+
+        .footer {
+            margin-bottom: 60px;
+        }
+
+        .navbar .container-fluid {
+            position: relative;
+        }
+
+        .navbar-brand {
+            z-index: 1;
+        }
+
+        #sidebarCollapse {
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <button type="button" id="sidebarCollapse" class="btn btn-light">
                 <i class="bi bi-list"></i>
             </button>
-            <a class="navbar-brand ms-3" href="/">
-                <span class="brand-text">FIND MED</span>
-            </a>
-            <partial name="_LoginPartial" />
+            <div class="mx-auto position-absolute start-50 translate-middle-x">
+                <a class="navbar-brand" href="/">
+                    <span class="brand-text">FIND MED</span>
+                </a>
+            </div>
+            <div class="ms-auto">
+                <partial name="_LoginPartial" />
+            </div>
         </div>
     </nav>
 
-    <!-- Sidebar -->
+ 
     <div id="sidebar">
         <div class="sidebar-header">
             <h4>Menu</h4>
@@ -116,7 +152,7 @@
         </div>
     </div>
 
-    <!-- Page Content -->
+    
     <div id="content">
         <div class="container mt-4">
             <main role="main" class="pb-3">
@@ -124,7 +160,33 @@
             </main>
         </div>
     </div>
-
+    <div class="contact-bar bg-success bg-opacity-75 py-3 text-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <div class="contact-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Call us: +962 79 123 4567">
+                        <a href="tel:+962791234567" class="text-white text-decoration-none">
+                            <i class="bi bi-telephone-fill"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Email us: contact@findmed.com">
+                        <a href="mailto:contact@findmed.com" class="text-white text-decoration-none">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow us on Facebook">
+                        <a href="https://facebook.com/findmed123" target="_blank" class="text-white text-decoration-none">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <footer class="footer text-muted bg-light">
         <div class="container">
             &copy; 2025 - FindMed - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -139,6 +201,14 @@
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $('#content').toggleClass('active');
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
             });
         });
     </script>

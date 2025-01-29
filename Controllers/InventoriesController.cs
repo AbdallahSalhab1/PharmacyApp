@@ -218,7 +218,7 @@ namespace PharmacyApp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(PharmacyInventory));
             }
             ViewData["MedicineId"] = new SelectList(_context.Medicines, "MedicineId", "MedicineId", inventory.MedicineId);
             ViewData["PharmacyId"] = new SelectList(_context.Pharmacies, "PharmacyId", "PharmacyId", inventory.PharmacyId);
@@ -257,7 +257,7 @@ namespace PharmacyApp.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(PharmacyInventory));
         }
 
         private bool InventoryExists(int id)
