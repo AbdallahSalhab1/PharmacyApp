@@ -2,14 +2,12 @@
 @{
     ViewData["Title"] = "Purchase History";
 }
-
 <div class="card bg-success bg-opacity-75 text-white mb-4">
     <div class="card-body">
         <h2 class="display-4">My Purchase History</h2>
         <p class="lead mb-0">Patient: @ViewData["PatientName"]</p>
     </div>
 </div>
-
 <div class="card">
     <div class="card-header bg-success bg-opacity-25">
         <h4>Purchase Records</h4>
@@ -32,7 +30,14 @@
                     {
                         <tr>
                             <td>@item.Medicine?.Name</td>
-                            <td>@item.Pharmacy?.PharmacyName</td>
+                            <td>
+                                @item.Pharmacy?.PharmacyName
+                                <i class="bi bi-geo-alt-fill text-success cursor-pointer"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="@item.Pharmacy?.Address">
+                                </i>
+                            </td>
                             <td>@item.Quantity</td>
                             <td>@item.PurchaseDate.ToString("g")</td>
                             <td>
@@ -66,3 +71,12 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
+}

@@ -1,78 +1,80 @@
 ﻿@model IEnumerable<NewWebApplicationProject.Models.Pharmacy>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Pharmacies";
 }
 
-<h1>Index</h1>
+<div class="card bg-success bg-opacity-75 text-white mb-4">
+    <div class="card-body">
+        <h2 class="display-4">Registered Pharmacies</h2>
+    </div>
+</div>
 
-@foreach (var pharmacy in Model)
-{
-    <tr>
-        <td>@pharmacy.PharmacyName</td>
-        <td>@pharmacy.Address</td>
-        <td>
-            <a asp-controller="Pharmacies" asp-action="ViewAnalytics" asp-route-id="@pharmacy.PharmacyId" class="btn btn-info">
-                View Analytics
+<div class="card">
+    <div class="card-header bg-success bg-opacity-25">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Pharmacy List</h4>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Pharmacy
             </a>
-        </td>
-    </tr>
-}
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.LicenseNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PharmacyName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsVerified)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.LicenseNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PharmacyName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsVerified)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.PharmacyId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.PharmacyId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.PharmacyId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="bg-success bg-opacity-25">
+                    <tr>
+                        <th>Pharmacy Name</th>
+                        <th>License Number</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.PharmacyName</td>
+                            <td>@item.LicenseNumber</td>
+                            <td>@item.Address</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Email</td>
+                            <td>
+                                @if (item.IsVerified)
+                                {
+                                    <span class="badge bg-success">Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="ViewAnalytics" asp-route-id="@item.PharmacyId"
+                                       class="btn btn-success btn-sm me-2">
+                                        <i class="bi bi-graph-up"></i> Analytics
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.PharmacyId"
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.PharmacyId"
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.PharmacyId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
