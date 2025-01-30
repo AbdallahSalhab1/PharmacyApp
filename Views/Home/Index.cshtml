@@ -13,46 +13,49 @@
 
 @if (User.IsInRole("Admin"))
 {
-    <div class="container mt-4">
-        <h2 class="mb-4">Admin Dashboard</h2>
-        <div class="row">
-            <div class="col-md-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Patients</h5>
-                        <p class="card-text">Manage patient records and information</p>
-                        <a class="btn btn-primary" href="/Patients/Index">View Patient</a>
-                    </div>
+    <div class="card bg-success bg-opacity-75 text-white mb-4">
+        <div class="card-body">
+            <h2 class="display-4">Admin Dashboard</h2>
+            <p class="lead mb-0">Welcome Administrator</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card bg-success bg-opacity-10 mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-shop display-1 text-success"></i>
+                    <h2 class="mb-3">Pharmacies</h2>
+                    <p class="text-muted mb-4">Manage pharmacy accounts and details</p>
+                    <a asp-controller="Pharmacies" asp-action="Index" class="btn btn-success">
+                        <i class="bi bi-shop"></i> View Pharmacies
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Pharmacies</h5>
-                        <p class="card-text">Manage pharmacies details</p>
-                        <a class="btn btn-primary" href="/Pharmacies/Index">View Pharmacies</a>
-                    </div>
+        <div class="col-md-4">
+            <div class="card bg-success bg-opacity-10 mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-capsule display-1 text-success"></i>
+                    <h2 class="mb-3">Medicines</h2>
+                    <p class="text-muted mb-4">Manage medicine catalog and information</p>
+                    <a asp-controller="Medicines" asp-action="Index" class="btn btn-success">
+                        <i class="bi bi-capsule"></i> View Medicines
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Purchases</h5>
-                        <p class="card-text">View and manage medicine purchases</p>
-                        <a class="btn btn-primary" href="/Purchases/Index">View Purchases</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Medicines</h5>
-                        <p class="card-text">Manage medicine details</p>
-                        <a class="btn btn-primary" href="/Medicines/Index">View Medicines</a>
-                    </div>
+        <div class="col-md-4">
+            <div class="card bg-success bg-opacity-10 mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-box-seam display-1 text-success"></i>
+                    <h2 class="mb-3">Inventories</h2>
+                    <p class="text-muted mb-4">View all pharmacies inventories</p>
+                    <a asp-controller="Inventories" asp-action="Index" class="btn btn-success">
+                        <i class="bi bi-box-seam"></i> View Inventories
+                    </a>
                 </div>
             </div>
         </div>

@@ -132,10 +132,8 @@
             @if (User.IsInRole("Admin"))
             {
                 <a href="/"><i class="bi bi-house-door me-2"></i>Dashboard</a>
-                <a href="/Patients/Index"><i class="bi bi-people me-2"></i>Patients</a>
                 <a href="/Pharmacies/Index"><i class="bi bi-shop me-2"></i>Pharmacies</a>
                 <a href="/Medicines/Index"><i class="bi bi-capsule me-2"></i>Medicines</a>
-                <a href="/Purchases/Index"><i class="bi bi-cart me-2"></i>Purchases</a>
             }
             else if (User.IsInRole("Pharmacy"))
             {

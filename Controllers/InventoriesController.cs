@@ -27,8 +27,30 @@ namespace PharmacyApp.Controllers
         // GET: Inventories
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Inventories.Include(i => i.Medicine).Include(i => i.Pharmacy);
-            return View(await applicationDbContext.ToListAsync());
+            var inventories = await _context.Inventories
+                .Include(i => i.Medicine)
+                .Include(i => i.Pharmacy)
+                .OrderBy(i => i.Pharmacy.PharmacyName)
+                .ThenBy(i => i.Medicine.Name)
+                .Select(i => new Inventory
+                {
+                    InventoryId = i.InventoryId,
+                    PharmacyId = i.PharmacyId,
+                    MedicineId = i.MedicineId,
+                    Quantity = i.Quantity,
+                    LastUpdated = i.LastUpdated,
+                    Pharmacy = new Pharmacy
+                    {
+                        PharmacyName = i.Pharmacy.PharmacyName
+                    },
+                    Medicine = new Medicine
+                    {
+                        Name = i.Medicine.Name
+                    }
+                })
+                .ToListAsync();
+
+            return View(inventories);
         }
 
         // GET: Inventories/Details/5
